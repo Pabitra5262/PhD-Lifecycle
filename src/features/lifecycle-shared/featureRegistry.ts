@@ -1,0 +1,17 @@
+import { definition as selectionSchedule } from "@/features/selection-schedule/form-config/selectionSchedule.fields";
+import { definition as resultsAdmission } from "@/features/results-admission/form-config/resultsAdmission.fields";
+import { definition as coursework } from "@/features/coursework/form-config/coursework.fields";
+import { definition as courseworkExams } from "@/features/coursework-exams/form-config/courseworkExams.fields";
+import { definition as researchRegistration } from "@/features/research-registration/form-config/researchRegistration.fields";
+import { definition as progressMonitoring } from "@/features/progress-monitoring/form-config/progressMonitoring.fields";
+import { definition as scholarRequests } from "@/features/scholar-requests/form-config/scholarRequests.fields";
+import { definition as preSubmissionSeminar } from "@/features/pre-submission-seminar/form-config/preSubmissionSeminar.fields";
+import { definition as thesisSubmission } from "@/features/thesis-submission/form-config/thesisSubmission.fields";
+import { definition as examinerManagement } from "@/features/examiner-management/form-config/examinerManagement.fields";
+import { definition as vivaVoce } from "@/features/viva-voce/form-config/vivaVoce.fields";
+import { definition as degreeAward } from "@/features/degree-award/form-config/degreeAward.fields";
+import { definition as reportsAnalytics } from "@/features/reports-analytics/form-config/reportsAnalytics.fields";
+import { definition as notifications } from "@/features/notifications/form-config/notifications.fields";
+import { definition as adminManagement } from "@/features/admin-management/form-config/adminManagement.fields";
+import { definition as auditTrail } from "@/features/audit-trail/form-config/auditTrail.fields";
+export const lifecycleFeatures = [selectionSchedule, resultsAdmission, coursework, courseworkExams, researchRegistration, progressMonitoring, scholarRequests, preSubmissionSeminar, thesisSubmission, examinerManagement, vivaVoce, degreeAward, reportsAnalytics, notifications, adminManagement, auditTrail];

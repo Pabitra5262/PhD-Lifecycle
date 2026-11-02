@@ -1,0 +1,18 @@
+export const lifecyclePagePaths = {
+    selectionSchedule: "/phd/admissions/selection-schedule",
+    resultsAdmission: "/phd/admissions/results-admission",
+    coursework: "/phd/coursework/course-management",
+    courseworkExams: "/phd/coursework/examination-certificate",
+    researchRegistration: "/phd/research-registration/supervisor-allocation",
+    progressMonitoring: "/phd/research/progress-monitoring",
+    scholarRequests: "/phd/requests",
+    preSubmissionSeminar: "/phd/thesis/pre-submission-seminar",
+    thesisSubmission: "/phd/thesis/final-submission",
+    examinerManagement: "/phd/thesis/examiner-management",
+    vivaVoce: "/phd/viva-voce",
+    degreeAward: "/phd/degree-award",
+    reportsAnalytics: "/phd/reports-analytics",
+    notifications: "/phd/notifications",
+    adminManagement: "/phd/administration/users",
+    auditTrail: "/phd/administration/audit-trail",
+} as const;
