@@ -1,13 +1,14 @@
-import { Plus, Save } from "lucide-react";
+import { Save } from "lucide-react";
 import { CONTROL_FIELDS } from "../form-config/advertisementFilters.fields";
 import { configuredFieldProps } from "@/features/shared/formFields";
 import { advertisementFields } from "../form-config/advertisement.fields";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Card, CardBody, CardHeader, DialogModal, FormGenerator, Input, showToast } from "@mfe/components";
 import PageHeader from "@/shared/components/layout/PageHeader";
 import { useRole } from "@/features/shared/store/PayFixStore";
+import { AdvertisementViewModal } from "../components/AdvertisementViewModal";
 import { AdvertisementList } from "../components/AdvertisementList";
 import { readAdvertisementRecords, saveAdvertisementRecord, transitionAdvertisement, type AdvertisementRecord, type AdvertisementStatus } from "../model/advertisementRecords";
 import { admissionConfig, advertisementSchema, type AdvertisementForm } from "../form-config/advertisementConfig";
@@ -18,7 +19,9 @@ import { readAdvertisementDraft, saveAdvertisementDraft } from "../form-config/a
 
 const AdvertisementManagementPage = () => {
     const { workflowRole: role } = useRole();
+    const formRef = useRef<HTMLFormElement>(null);
     const [records, setRecords] = useState(readAdvertisementRecords);
+    const [isEditing, setIsEditing] = useState(false);
     const [viewing, setViewing] = useState<AdvertisementRecord | null>(null);
     const [pending, setPending] = useState<{ row: AdvertisementRecord; status: AdvertisementStatus } | null>(null);
     const [sessionDraft] = useState(readAdvertisementDraft);
@@ -57,31 +60,34 @@ const AdvertisementManagementPage = () => {
         } catch (error) { showToast.error("Cannot save advertisement", error instanceof Error ? error.message : "Save failed"); }
     });
     const load = (row: AdvertisementRecord, readOnly: boolean) => {
+        if (readOnly) {
+            setViewing(row);
+            return;
+        }
         form.reset(row.form);
-        setViewing(readOnly ? row : null);
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        setIsEditing(true);
+        // Let the action menu close and restore focus before starting the scroll.
+        requestAnimationFrame(() => {
+            formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
     };
     return (
         <>
             <PageHeader title="Advertisement Mgmt" />
             <Card>
-                <CardHeader title="Advertisement Mgmt" divider />
+                <CardHeader title={isEditing ? "Edit Advertisement" : "Create Advertisement"} divider />
                 <CardBody>
                 <FormProvider {...form}>
-                    <form onSubmit={save}>
-                        <fieldset disabled={viewing !== null}>
+                    <form ref={formRef} onSubmit={save} className="scroll-mt-24">
                         <FormGenerator standalone fields={fields} gridColumns={12} onSubmit={() => undefined} />
-                        <div className="mt-4 grid grid-cols-12 gap-4"><Input {...configuredFieldProps(CONTROL_FIELDS.statusDisplay)} value={viewing?.status ?? "Draft"} /></div>
-                        {!viewing && <div className="mt-5 flex flex-wrap justify-start gap-2 border-t border-border pt-5"><Button icon={<Save size={16} />} action="save" type="submit" label="Save Draft" /></div>}
-                        </fieldset>
-                        {viewing && <div className="mt-5 flex flex-wrap justify-start gap-2 border-t border-border pt-5"><Button icon={<Plus size={16} />} type="button" label="New Advertisement" onClick={() => {
-                            form.reset({ advertisementNumber: `PHD/ADV/${new Date().getFullYear()}/${crypto.randomUUID().toUpperCase()}`, advertisementDate: "", academicSession: "", university: "", department: "", researchArea: "", seatsApplicable: true, seats: "", eligibilityCriteria: "", qualificationRule: "", permittedExemptions: [], applicationStart: "", applicationEnd: "", selectionProcess: "", supportingDocument: null, status: "Draft" }); setViewing(null);
-                        }} /></div>}
+                        <div className="mt-4 grid grid-cols-12 gap-4"><Input {...configuredFieldProps(CONTROL_FIELDS.statusDisplay)} value="Draft" /></div>
+                        <div className="mt-5 flex flex-wrap justify-start gap-2 border-t border-border pt-5"><Button rightIcon={Save} action="save" type="submit" label="Save Draft" /></div>
                     </form>
                 </FormProvider>
                 </CardBody>
             </Card>
             <AdvertisementList records={records} onView={(row) => load(row, true)} onEdit={(row) => load(row, false)} onTransition={(row, status) => setPending({ row, status })} />
+            <AdvertisementViewModal record={viewing} onClose={() => setViewing(null)} />
             <DialogModal isOpen={pending !== null} title={pending ? `${pending.status === "Submitted" ? "Submit for Approval" : pending.status} Advertisement` : "Advertisement"} message={`Confirm this action for ${pending?.row.form.advertisementNumber ?? ""}?`} onClose={() => setPending(null)} onConfirm={() => {
                 if (!pending) return;
                 try { const updated = transitionAdvertisement(pending.row.id, pending.status, role); setRecords(readAdvertisementRecords()); if (viewing?.id === updated.id) setViewing(updated); setPending(null); showToast.success("Advertisement updated"); }

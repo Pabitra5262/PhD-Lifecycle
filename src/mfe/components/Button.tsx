@@ -1,4 +1,5 @@
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
+import type { LucideIcon } from "lucide-react";
 import { Button as WireButton } from "@/shared/components/ui/Button";
 import type { ButtonVariant as WireVariant } from "@/shared/components/ui/Button";
 
@@ -43,6 +44,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     size?: ButtonSize;
     loading?: boolean;
     icon?: ReactNode;
+    rightIcon?: LucideIcon;
 }
 
 /** Same as hplus_react ACTION_CONFIG_MAP: default variant, label and button type per action. */
@@ -81,7 +83,7 @@ const TO_WIRE: Record<ButtonVariant, WireVariant> = {
 };
 
 export const Button = forwardRef<HTMLButtonElement, Readonly<ButtonProps>>(function Button(
-    { label, action, variant, size = "md", loading, icon, type, children, ...rest },
+    { label, action, variant, size = "md", loading, icon, rightIcon, type, children, ...rest },
     ref,
 ) {
     const config = action ? ACTIONS[action] : undefined;
@@ -93,6 +95,7 @@ export const Button = forwardRef<HTMLButtonElement, Readonly<ButtonProps>>(funct
             size={size}
             loading={loading}
             icon={icon}
+            rightIcon={rightIcon}
             {...rest}
         >
             {label ?? children ?? config?.label}

@@ -46,7 +46,7 @@ export function ApplicationScrutinyCard({ controller }: ScrutinyViewProps) {
                     {[errors.permission, errors.status, errors.revision].filter(Boolean).map((error) => <p key={error} className="ui-error" role="alert">{error}</p>)}
                     <div className="col-span-12 mt-5 flex flex-wrap justify-start gap-2 border-t border-border pt-5">
                         {selected && <Button icon={<History size={16} />} type="button" label="View History" variant="outline" onClick={() => setHistoryOpen(true)} />}
-                        <Button icon={<ArrowRight size={16} />} type="submit" label="Forward" disabled={!editable} />
+                        <Button rightIcon={ArrowRight} type="submit" label="Forward" disabled={!editable} />
                         <Button icon={<Undo2 size={16} />} type="button" label="Return" variant="warning" disabled={!editable} onClick={() => prepare("Return")} />
                     </div>
                 </form>

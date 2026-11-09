@@ -268,7 +268,7 @@ export function LifecycleFormCard({
                 onClick={c.reset}
               />
               <Button
-                icon={<ArrowRight size={16} />}
+                rightIcon={ArrowRight}
                 type="submit"
                 label="Submit"
                 disabled={c.locked}

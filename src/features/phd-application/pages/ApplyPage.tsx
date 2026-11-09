@@ -135,7 +135,7 @@ const ApplyForm = ({ account, verifiedHimsId, demo }: { account: string; verifie
                         {submitted && <p role="status" className="mb-4 text-sm">Application submitted. Reference: {current.reference}</p>}
                         <div className="mt-5 flex flex-wrap justify-start gap-2 border-t border-border pt-5">
                             <Button icon={<Save size={16} />} action="save" type="button" variant="outline" label="Save Draft" disabled={!profile} onClick={() => save(false)} />
-                            <Button icon={<ArrowRight size={16} />} action="submit" type="submit" label={current?.status === "Returned" ? "Resubmit Application" : "Submit Application"} disabled={submitted || Object.keys(errors).length > 0} />
+                            <Button rightIcon={ArrowRight} action="submit" type="submit" label={current?.status === "Returned" ? "Resubmit Application" : "Submit Application"} disabled={submitted || Object.keys(errors).length > 0} />
                         </div>
                     </CardBody>
                 </fieldset>

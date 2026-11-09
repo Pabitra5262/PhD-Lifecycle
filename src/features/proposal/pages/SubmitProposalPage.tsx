@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Save, Send } from "lucide-react";
+import { ArrowLeft, ArrowRight, Save } from "lucide-react";
 import { Alert, Button, Card, CardBody, StatusModal, Stepper, showToast, useAppNavigate, type StatusModalType } from "@mfe/components";
 import PageHeader from "@/shared/components/layout/PageHeader";
 import {
@@ -164,7 +164,7 @@ const SubmitProposalPage = () => {
                 {step < STEPS.length - 1 ? (
                     <Button icon={<ArrowRight size={16} />} label="Next" onClick={() => setStep(step + 1)} />
                 ) : (
-                    <Button variant="success" icon={<Send size={16} />} label={editing?.status === "Returned" ? "Re-submit" : "Submit"} onClick={() => submit("submit")} />
+                    <Button variant="success" rightIcon={ArrowRight} label={editing?.status === "Returned" ? "Re-submit" : "Submit"} onClick={() => submit("submit")} />
                 )}
             </div>
         </div>

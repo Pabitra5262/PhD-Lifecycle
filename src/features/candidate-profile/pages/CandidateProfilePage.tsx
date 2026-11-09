@@ -107,7 +107,7 @@ const ProfileForm = ({ account, verifiedHimsId, demo }: { account: string; verif
                             {renderFields(fields.documents)}
                             <div className="mt-5 flex flex-wrap justify-start gap-2 border-t border-border pt-5">
                                 <Button icon={<Save size={16} />} action="save" variant="outline" type="button" label="Save Draft" onClick={() => save(getValues(), false)} />
-                                <Button icon={<ArrowRight size={16} />} action="submit" type="submit" label="Submit Profile" />
+                                <Button rightIcon={ArrowRight} action="submit" type="submit" label="Submit Profile" />
                             </div>
                         </CardBody>
                     </Card>

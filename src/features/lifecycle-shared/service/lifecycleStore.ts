@@ -7,6 +7,10 @@ import { activeAdvertisements } from "@/features/phd-application/service/adverti
 import { scrutinyApplications } from "@/features/phd-application/service/applicationService";
 
 export const dateToday = () => new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+const auditTimestamp = (date = new Date()) => date.toLocaleString("en-GB", {
+    timeZone: "Asia/Kolkata", day: "2-digit", month: "2-digit", year: "numeric",
+    hour: "2-digit", minute: "2-digit", hour12: true,
+});
 const names = ["Ananya Das", "Rohan Mishra", "Priya Sahoo", "Arjun Nayak", "Sneha Mohanty"];
 export const faculty = ["Prof. S. K. Behera", "Prof. Rajesh Sharma", "Dr. P. Mohanty", "Prof. M. Ray", "Dr. Anita Das"];
 export const subjects = ["Research Methodology", "Research and Publication Ethics", "Quantitative Techniques", "Advanced Research Methods", "Research Seminar"];
@@ -124,7 +128,7 @@ function ensureRecords(def: Definition) {
             eventType: ["Selection Schedule", "Progress Submission", "Examiner Report", "Viva-Voce", "Registration Expiry"][i], recipient: name, message: "Review the assigned lifecycle activity before the due date.", deliveryChannel: "In-application", deliveryStatus: "Delivered", dueDate: dateToday(),
             username: name.toLowerCase().replace(" ", "."), email: name.toLowerCase().replace(" ", ".") + "@scholars.example", mobile: "900000000" + (i + 1), role: "Student / PhD Scholar", permissions: ["View"],
             approvalStatus: "Approved", approvalDate: dateToday(), examinerName: faculty[i], affiliation: "Utkal University", evaluationStatus: "Completed", approvalDecision: "Approved", archive: "Archived", finalDegreeNumber: "PHD-DEG-2026-" + String(i + 1).padStart(3, "0"), provisionalNumber: "PHD-PROV-2026-" + String(i + 1).padStart(3, "0"),
-            actionType: "Submitted", recordReference: scholar.id, userTimestamp: faculty[i] + " / " + dateToday(), changeDetails: "Lifecycle record submitted for review.", status: def.key === "degreeAward" ? "Completed" : "Submitted",
+            actionType: "Submitted", recordReference: scholar.id, userTimestamp: faculty[i] + " / " + auditTimestamp(), changeDetails: "Lifecycle record submitted for review.", status: def.key === "degreeAward" ? "Completed" : "Submitted",
         };
         def.columns.forEach((column) => { values[column.name] ??= /Date|schedule/i.test(column.name) ? dateToday() : /remarks|recommend|proceeding/i.test(column.name) ? "Reviewed according to configured university requirements." : ""; });
         const grids: Record<string, Values[]> = def.key === "examinerManagement" ? { nominations: faculty.slice(0, 2).map((examinerName, index) => ({ examinerName, affiliation: "Utkal University", email: "examiner" + (index + 1) + "@research.example", mobile: "900000001" + index })) } : {};
@@ -140,14 +144,14 @@ export function makeFeatureService(def: Definition): FeatureService {
             const row = (data.get(def.key) ?? []).find((item) => item.id === id);
             if (!row || !inScope(row, actor) || row.values.approvalStatus === "Approved" || (row.grids.nominations?.length ?? 0) < 2) throw new Error("Only pending valid nominations can be approved");
             row.values.approvalStatus = "Approved"; row.values.approvalDate = dateToday(); row.status = "Approved"; row.values.status = row.status;
-            const audit = data.get("auditTrail") ?? []; audit.unshift({ ...clone(row), id: crypto.randomUUID(), archived: true, date: new Date().toISOString(), values: { actionType: "Examiner nomination approved", recordReference: row.values.reference, userTimestamp: actor.userId + " / " + new Date().toISOString(), changeDetails: "Pending -> Approved" } }); data.set("auditTrail", audit); changed(); return clone(row);
+            const audit = data.get("auditTrail") ?? []; audit.unshift({ ...clone(row), id: crypto.randomUUID(), archived: true, date: new Date().toISOString(), values: { actionType: "Examiner nomination approved", recordReference: row.values.reference, userTimestamp: actor.userId + " / " + auditTimestamp(), changeDetails: "Pending -> Approved" } }); data.set("auditTrail", audit); changed(); return clone(row);
         },
         changeAccountStatus: (actor, id, active) => {
             if (def.key !== "adminManagement" || !def.writers.includes(actor.role) || actor.sourceRole && !canOpen(actor.sourceRole, "adminManagement")) throw new Error("User administration permission is required");
             const row = (data.get(def.key) ?? []).find((item) => item.id === id);
             if (!row || !inScope(row, actor)) throw new Error("User account is outside your scope");
             const before = row.status; row.status = active ? "Active" : "Inactive"; row.values.status = row.status;
-            const audit = data.get("auditTrail") ?? []; audit.unshift({ ...clone(row), id: crypto.randomUUID(), archived: true, date: new Date().toISOString(), values: { actionType: active ? "Activated" : "Deactivated", recordReference: row.values.username, userTimestamp: actor.userId + " / " + new Date().toISOString(), changeDetails: before + " -> " + row.status } }); data.set("auditTrail", audit); changed(); return clone(row);
+            const audit = data.get("auditTrail") ?? []; audit.unshift({ ...clone(row), id: crypto.randomUUID(), archived: true, date: new Date().toISOString(), values: { actionType: active ? "Activated" : "Deactivated", recordReference: row.values.username, userTimestamp: actor.userId + " / " + auditTimestamp(), changeDetails: before + " -> " + row.status } }); data.set("auditTrail", audit); changed(); return clone(row);
         },
         save: (actor, values, grids, fields, id) => {
             if (!actor.userId || !def.writers.includes(actor.role) || actor.sourceRole && !canOpen(actor.sourceRole, def.key as PageKey)) throw new Error("This role cannot submit this lifecycle record.");
@@ -196,7 +200,7 @@ export function makeFeatureService(def: Definition): FeatureService {
             if (def.key === "adminManagement") record.status = previous?.status ?? "Active";
             record.values.status = record.status;
             const rows = data.get(def.key)!; if (previous) rows[rows.indexOf(previous)] = record; else rows.unshift(record);
-            const audit = data.get("auditTrail") ?? []; audit.unshift({ ...clone(record), id: crypto.randomUUID(), archived: true, values: { actionType: previous ? "Updated" : "Submitted", recordReference: String(record.values.reference), userTimestamp: actor.userId + " / " + record.date, changeDetails: JSON.stringify({ before: previous?.values ?? null, after: record.values }) } }); data.set("auditTrail", audit);
+            const audit = data.get("auditTrail") ?? []; audit.unshift({ ...clone(record), id: crypto.randomUUID(), archived: true, values: { actionType: previous ? "Updated" : "Submitted", recordReference: String(record.values.reference), userTimestamp: actor.userId + " / " + auditTimestamp(new Date(record.date)), changeDetails: JSON.stringify({ before: previous?.values ?? null, after: record.values }) } }); data.set("auditTrail", audit);
             if (def.key !== "notifications") { const notices = data.get("notifications") ?? []; notices.unshift({ ...clone(record), id: crypto.randomUUID(), values: { eventType: def.title, recipient: record.owner, message: def.title + " submitted for review.", dueDate: String(normalized.dueDate ?? ""), deliveryChannel: "In-application", deliveryStatus: "Delivered" } }); data.set("notifications", notices); }
             changed(); return clone(record);
         },
